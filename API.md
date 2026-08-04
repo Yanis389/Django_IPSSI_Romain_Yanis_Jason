@@ -45,10 +45,20 @@ Format d'une série (`Show`) :
 
 - `POST /api/auth/register/` body `{ "username": str, "password": str }`
 - `POST /api/auth/login/` body `{ "username": str, "password": str }`
-- `POST /api/auth/logout/` → vide aussi la watchlist + le profil de goût
-- `GET /api/watchlist/` → liste de `{ "id": int, "show": Show, "added_at": str }`
-- `POST /api/watchlist/` body `{ "show_id": int }`
-- `DELETE /api/watchlist/<id>/`
+- `POST /api/auth/logout/` → vide aussi les watchlists + le profil de goût
+- `GET /api/watchlists/` → liste des watchlists de l'utilisateur : `{ "id": int, "name": str, "entries": [...] }`
+- `POST /api/watchlists/` body `{ "name": str }` → crée une nouvelle watchlist nommée
+- `GET /api/watchlists/<id>/` → détail d'une watchlist avec ses entrées
+- `POST /api/watchlists/<id>/entries/` body `{ "show_id": int }` → ajoute une série à cette watchlist
+- `DELETE /api/watchlists/<id>/entries/<entry_id>/` → retire une série
+
+Décision d'équipe : passage d'une watchlist unique à plusieurs watchlists
+nommées par utilisateur (ex. "Séries d'été", "À voir en famille"), pour
+enrichir la démo sans trop complexifier le modèle.
+
+**Bonus (fin de semaine, si le temps le permet) :** partage d'une watchlist
+avec d'autres utilisateurs — pas dans le scope principal, gestion des
+permissions à définir si on l'attaque.
 
 ## Règles communes
 
