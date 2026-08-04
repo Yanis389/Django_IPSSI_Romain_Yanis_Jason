@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 FRENCH_STOP_WORDS = [
@@ -17,3 +18,17 @@ def fit_vectorizer(synopses):
 
 def build_show_vectors(vectorizer, synopses):
     return vectorizer.transform(synopses).toarray().tolist()
+
+
+def cosine_similarity(vector_a, vector_b):
+    a = np.array(vector_a, dtype=float)
+    b = np.array(vector_b, dtype=float)
+    if not a.any() or not b.any():
+        return 0.0
+    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+
+
+def rank_by_similarity(reference_vector, catalog, limit=20):
+    scored = [(cosine_similarity(reference_vector, vector), item_id) for item_id, vector in catalog]
+    scored.sort(key=lambda pair: pair[0], reverse=True)
+    return [item_id for _, item_id in scored[:limit]]
