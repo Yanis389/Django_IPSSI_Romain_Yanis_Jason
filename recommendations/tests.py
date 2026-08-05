@@ -5,6 +5,7 @@ from .vectorizer import (
     cosine_similarity,
     fit_vectorizer,
     rank_by_similarity,
+    recompute_profile_vector,
     update_profile_vector,
 )
 
@@ -32,3 +33,13 @@ class VectorizerTests(TestCase):
     def test_profile_update(self):
         updated = update_profile_vector(None, self.vectors[0], self.vectors[1])
         self.assertEqual(len(updated), len(self.vectors[0]))
+
+    def test_recompute_matches_replayed_updates(self):
+        pairs = [(self.vectors[0], self.vectors[1]), (self.vectors[2], self.vectors[0])]
+        dim = len(self.vectors[0])
+
+        replayed = [0.0] * dim
+        for chosen, rejected in pairs:
+            replayed = update_profile_vector(replayed, chosen, rejected)
+
+        self.assertEqual(recompute_profile_vector(pairs, dim), replayed)
