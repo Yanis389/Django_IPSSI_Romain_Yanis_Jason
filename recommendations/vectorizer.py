@@ -41,3 +41,10 @@ def update_profile_vector(profile_vector, chosen_vector, rejected_vector, alpha=
     rejected = np.array(rejected_vector, dtype=float)
     updated = profile + alpha * (chosen - rejected)
     return updated.tolist()
+
+
+def recompute_profile_vector(choice_pairs, vector_dim):
+    profile = [0.0] * vector_dim
+    for chosen_vector, rejected_vector in choice_pairs:
+        profile = update_profile_vector(profile, chosen_vector, rejected_vector)
+    return profile
