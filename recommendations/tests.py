@@ -1,6 +1,12 @@
 from django.test import TestCase
 
-from .vectorizer import build_show_vectors, cosine_similarity, fit_vectorizer, rank_by_similarity
+from .vectorizer import (
+    build_show_vectors,
+    cosine_similarity,
+    fit_vectorizer,
+    rank_by_similarity,
+    update_profile_vector,
+)
 
 
 class VectorizerTests(TestCase):
@@ -22,3 +28,7 @@ class VectorizerTests(TestCase):
     def test_ranking(self):
         catalog = list(enumerate(self.vectors))
         self.assertEqual(rank_by_similarity(self.vectors[0], catalog)[0], 0)
+
+    def test_profile_update(self):
+        updated = update_profile_vector(None, self.vectors[0], self.vectors[1])
+        self.assertEqual(len(updated), len(self.vectors[0]))
