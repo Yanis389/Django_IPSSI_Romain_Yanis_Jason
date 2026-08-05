@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from shows.models import Show
 
 class Command(BaseCommand):
-    help = "Scrape TMDB pour peupler la base de données avec des séries réelles."
+    help = "Scrape TMDB pour peupler la base de données et générer les vecteurs TF-IDF."
 
     def add_arguments(self, parser):
         parser.add_argument('--pages', type=int, default=5, help='Nombre de pages TMDB à récupérer.')
@@ -35,7 +35,6 @@ class Command(BaseCommand):
             for item in pop_res.json().get('results', []):
                 tmdb_id = item['id']
                 
-                # Détails complémentaires pour le statut, les saisons, etc.
                 detail_res = requests.get(f"{base_url}/tv/{tmdb_id}", params={"api_key": api_key, "language": "fr-FR"})
                 detail_data = detail_res.json() if detail_res.status_code == 200 else {}
 
@@ -44,7 +43,6 @@ class Command(BaseCommand):
                 poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
                 run_time_list = detail_data.get('episode_run_time') or [0]
 
-                # 3. Sauvegarde en base de données
                 show, created = Show.objects.update_or_create(
                     tmdb_id=tmdb_id,
                     defaults={
@@ -68,4 +66,17 @@ class Command(BaseCommand):
                 if created:
                     shows_created += 1
 
-        self.stdout.write(self.style.SUCCESS(f"Seed terminé ! {shows_created} nouvelles séries importées. Total en base : {Show.objects.count()}."))
+        self.stdout.write(self.style.SUCCESS(f"Import TMDB terminé ({shows_created} nouvelles séries). Calcul des vecteurs en cours..."))
+
+        # 3. Calcul global des vecteurs TF-IDF sur TOUTES les séries
+        from recommendations.vectorizer import fit_vectorizer, build_show_vectors
+        shows = list(Show.objects.all())
+        synopses = [s.synopsis or "" for s in shows]
+        vectorizer = fit_vectorizer(synopses)
+        vectors = build_show_vectors(vectorizer, synopses)
+        
+        for show, vector in zip(shows, vectors):
+            show.feature_vector = vector
+            show.save(update_fields=['feature_vector'])
+
+        self.stdout.write(self.style.SUCCESS("Vecteurs TF-IDF calculés."))
