@@ -32,3 +32,12 @@ def rank_by_similarity(reference_vector, catalog, limit=20):
     scored = [(cosine_similarity(reference_vector, vector), item_id) for item_id, vector in catalog]
     scored.sort(key=lambda pair: pair[0], reverse=True)
     return [item_id for _, item_id in scored[:limit]]
+
+
+def update_profile_vector(profile_vector, chosen_vector, rejected_vector, alpha=1.0):
+    dim = len(chosen_vector)
+    profile = np.array(profile_vector if profile_vector else [0.0] * dim, dtype=float)
+    chosen = np.array(chosen_vector, dtype=float)
+    rejected = np.array(rejected_vector, dtype=float)
+    updated = profile + alpha * (chosen - rejected)
+    return updated.tolist()
