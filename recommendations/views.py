@@ -119,3 +119,17 @@ class RecommendationsView(APIView):
         shows_by_id = {s.id: s for s in Show.objects.filter(pk__in=top_ids)}
         ordered_shows = [shows_by_id[i] for i in top_ids if i in shows_by_id]
         return Response(ShowListSerializer(ordered_shows, many=True).data)
+
+
+class GenreBreakdownView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        chosen_ids = DuelChoice.objects.filter(user=request.user).values_list('show_chosen_id', flat=True)
+        counts = {}
+        for show in Show.objects.filter(pk__in=chosen_ids).values('genres', 'synopsis'):
+            for genre in split_scifi_fantasy(show['genres'], show['synopsis']):
+                counts[genre] = counts.get(genre, 0) + 1
+
+        top = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:6]
+        return Response([{'genre': genre, 'count': count} for genre, count in top])
