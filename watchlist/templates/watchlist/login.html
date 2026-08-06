@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion — SérieMatch{% endblock %}
+
+{% block content %}
+<h1>Connexion</h1>
+
+<form id="form-auth" class="form-auth">
+    <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <div class="form-boutons">
+        <button type="submit">Se connecter</button>
+        <button type="button" id="btn-register">Creer un compte</button>
+    </div>
+</form>
+
+<p id="message" class="message"></p>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const message = document.getElementById('message');
+
+function envoyer(url) {
+    const data = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+    };
+    apiPost(url, data)
+        .then(r => r.json().then(body => ({ok: r.ok, body})))
+        .then(({ok, body}) => {
+            if (ok) {
+                window.location.href = '/';
+            } else {
+                message.textContent = body.error || 'Erreur';
+            }
+        });
+}
+
+document.getElementById('form-auth').addEventListener('submit', (e) => {
+    e.preventDefault();
+    envoyer('/api/auth/login/');
+});
+
+document.getElementById('btn-register').addEventListener('click', () => {
+    envoyer('/api/auth/register/');
+});
+</script>
+{% endblock %}

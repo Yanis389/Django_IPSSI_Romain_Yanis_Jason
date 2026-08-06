@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Mes listes — SérieMatch{% endblock %}
+
+{% block content %}
+<h1>Mes listes</h1>
+
+<form id="form-liste" class="form-liste">
+    <input type="text" id="nom-liste" placeholder="Nom de la nouvelle liste" required>
+    <button type="submit">Creer</button>
+</form>
+
+<div id="listes"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const zone = document.getElementById('listes');
+
+function afficherListes(listes) {
+    if (listes.length === 0) {
+        zone.innerHTML = '<p class="vide">Aucune liste pour le moment.</p>';
+        return;
+    }
+    zone.innerHTML = listes.map(liste => `
+        <section class="liste">
+            <h2>${liste.name} (${liste.entries.length})</h2>
+            <div class="carrousel">
+                ${liste.entries.length === 0
+                    ? '<p class="vide">Liste vide.</p>'
+                    : liste.entries.map(entree => `
+                        <div class="carte-entree">
+                            ${carteSerie(entree.show)}
+                            <button class="btn-retirer"
+                                    data-liste="${liste.id}"
+                                    data-entree="${entree.id}">Retirer</button>
+                        </div>
+                    `).join('')}
+            </div>
+        </section>
+    `).join('');
+
+    document.querySelectorAll('.btn-retirer').forEach(bouton => {
+        bouton.addEventListener('click', () => {
+            const url = `/api/watchlists/${bouton.dataset.liste}/entries/${bouton.dataset.entree}/`;
+            apiDelete(url).then(charger);
+        });
+    });
+}
+
+function charger() {
+    fetch('/api/watchlists/')
+        .then(r => {
+            if (r.status === 403) {
+                window.location.href = '/connexion/';
+                return [];
+            }
+            return r.json();
+        })
+        .then(afficherListes);
+}
+
+document.getElementById('form-liste').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const champ = document.getElementById('nom-liste');
+    apiPost('/api/watchlists/', {name: champ.value}).then(() => {
+        champ.value = '';
+        charger();
+    });
+});
+
+charger();
+</script>
+{% endblock %}
