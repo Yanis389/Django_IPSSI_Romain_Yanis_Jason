@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Duels — SérieMatch{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'recommendations/css/duels.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Choisis ta série préférée</h1>
+<p class="subtitle">
+    <span id="duel-count">1</span> / <span id="duel-total">10</span> duels
+</p>
+
+<div class="duel-pair" id="duel-pair"></div>
+
+<button type="button" id="duel-skip" class="skip-btn">Aucun des deux</button>
+
+<div id="duel-done" class="duel-done" hidden>
+    <h2>Profil créé !</h2>
+    <p>On a une bonne idée de tes goûts. Direction l'accueil pour tes recommandations.</p>
+    <a href="/" class="btn">Voir mes recommandations</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'recommendations/js/duels.js' %}"></script>
+{% endblock %}
