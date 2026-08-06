@@ -15,7 +15,7 @@ urlpatterns = [
         name='watchlist-entry-detail',
     ),
 
-    path('', views.home_page, name='page-home'),
+    path('accueil/', views.home_page, name='page-home'),
     path('connexion/', views.login_page, name='page-login'),
     path('watchlists/', views.watchlists_page, name='page-watchlists'),
 ]
