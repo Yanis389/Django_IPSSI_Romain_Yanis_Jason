@@ -1,0 +1,12 @@
+.radar-section {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.radar-section h2 {
+    margin-bottom: 1rem;
+}
+
+#genre-radar svg text {
+    font-family: system-ui, -apple-system, sans-serif;
+}

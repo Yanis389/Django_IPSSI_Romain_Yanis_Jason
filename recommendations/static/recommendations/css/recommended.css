@@ -1,0 +1,34 @@
+.recommended-section {
+    margin-top: 3rem;
+}
+
+.recommended-section h2 {
+    margin-bottom: 1rem;
+}
+
+.recommended-grid {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.recommended-card {
+    flex: 0 0 auto;
+    width: 160px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.recommended-card img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 0.5rem;
+    background: #1a1a26;
+}
+
+.recommended-card h3 {
+    font-size: 0.95rem;
+    margin: 0;
+}
