@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from .genre_utils import split_scifi_fantasy
 from .vectorizer import (
     build_show_vectors,
     cosine_similarity,
@@ -43,3 +44,26 @@ class VectorizerTests(TestCase):
             replayed = update_profile_vector(replayed, chosen, rejected)
 
         self.assertEqual(recompute_profile_vector(pairs, dim), replayed)
+
+
+class GenreSplitTests(TestCase):
+    def test_fantasy_synopsis(self):
+        genres = split_scifi_fantasy(
+            ["Science-Fiction & Fantastique"],
+            "Un jeune sorcier doit maitriser la magie pour sauver son royaume des dragons.",
+        )
+        self.assertEqual(genres, ["Fantastique"])
+
+    def test_scifi_synopsis(self):
+        genres = split_scifi_fantasy(
+            ["Science-Fiction & Fantastique"],
+            "Un robot explore une planete lointaine a bord d'un vaisseau spatial.",
+        )
+        self.assertEqual(genres, ["Science-Fiction"])
+
+    def test_unclear_synopsis_keeps_combined_tag(self):
+        genres = split_scifi_fantasy(["Science-Fiction & Fantastique"], "Une histoire sans indice particulier.")
+        self.assertEqual(genres, ["Science-Fiction & Fantastique"])
+
+    def test_untouched_when_tag_absent(self):
+        self.assertEqual(split_scifi_fantasy(["Drame"], "peu importe"), ["Drame"])

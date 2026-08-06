@@ -1,12 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from recommendations.models import UserProfile
 from shows.models import Show
 
 from .models import Watchlist, WatchlistEntry
@@ -58,10 +57,6 @@ def login_view(request):
 def logout_view(request):
     if request.user.is_authenticated:
         Watchlist.objects.filter(user=request.user).delete()
-        UserProfile.objects.filter(user=request.user).update(
-            taste_vector=[],
-            onboarding_completed=False,
-        )
     logout(request)
     return Response({'detail': 'deconnecte'})
 
@@ -128,15 +123,3 @@ def watchlist_entry_detail(request, pk, entry_id):
     entree = get_object_or_404(WatchlistEntry, pk=entry_id, watchlist=liste)
     entree.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-def home_page(request):
-    return render(request, 'watchlist/home.html')
-
-
-def login_page(request):
-    return render(request, 'watchlist/login.html')
-
-
-def watchlists_page(request):
-    return render(request, 'watchlist/watchlists.html')
