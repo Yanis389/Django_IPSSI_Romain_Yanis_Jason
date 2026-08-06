@@ -10,7 +10,7 @@ from shows.serializers import ShowListSerializer
 
 from .models import DuelChoice, UserProfile
 from .serializers import DuelChoiceInputSerializer
-from .vectorizer import update_profile_vector
+from .vectorizer import rank_by_similarity, update_profile_vector
 
 
 @ensure_csrf_cookie
@@ -94,3 +94,25 @@ class DuelChooseView(APIView):
         profile.save(update_fields=['taste_vector'])
 
         return Response({'taste_vector': profile.taste_vector})
+
+
+class RecommendationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = UserProfile.objects.filter(user=request.user).first()
+        seen_ids = set(DuelChoice.objects.filter(user=request.user).values_list('show_chosen_id', 'show_rejected_id'))
+        seen_ids = {pk for pair in seen_ids for pk in pair}
+
+        if not profile or not any(profile.taste_vector):
+            shows = Show.objects.exclude(pk__in=seen_ids).order_by('-popularity')[:12]
+            return Response(ShowListSerializer(shows, many=True).data)
+
+        catalog = [
+            (s['id'], s['feature_vector'])
+            for s in Show.objects.exclude(pk__in=seen_ids).exclude(feature_vector=[]).values('id', 'feature_vector')
+        ]
+        top_ids = rank_by_similarity(profile.taste_vector, catalog, limit=12)
+        shows_by_id = {s.id: s for s in Show.objects.filter(pk__in=top_ids)}
+        ordered_shows = [shows_by_id[i] for i in top_ids if i in shows_by_id]
+        return Response(ShowListSerializer(ordered_shows, many=True).data)
