@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>Choisis ta série préférée</h1>
+<h1 id="duel-title">Choisis ta série préférée</h1>
 <p class="subtitle">
     <span id="duel-count">1</span> / <span id="duel-total">10</span> duels
 </p>
@@ -19,8 +19,9 @@
 
 <div id="duel-done" class="duel-done" hidden>
     <h2>Profil créé !</h2>
-    <p>On a une bonne idée de tes goûts. Direction l'accueil pour tes recommandations.</p>
-    <a href="/" class="btn">Voir mes recommandations</a>
+    <p>On a une bonne idée de tes goûts.</p>
+    {% include "recommendations/recommended_section.html" %}
+    {% include "recommendations/radar_section.html" %}
 </div>
 {% endblock %}
 

@@ -9,6 +9,11 @@
     margin-top: 2rem;
 }
 
+.duel-pair[hidden],
+.skip-btn[hidden] {
+    display: none;
+}
+
 .duel-card {
     flex: 1;
     background: #1a1a26;
@@ -60,14 +65,4 @@
 .duel-done {
     text-align: center;
     margin-top: 3rem;
-}
-
-.btn {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 0.75rem 1.5rem;
-    background: #6c5ce7;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 8px;
 }

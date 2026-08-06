@@ -36,10 +36,13 @@ function renderCard(show, onClick) {
 
 function loadNextDuel() {
     if (duelIndex >= TOTAL_DUELS) {
+        document.getElementById("duel-title").hidden = true;
         document.getElementById("duel-pair").hidden = true;
         document.querySelector(".subtitle").hidden = true;
         document.getElementById("duel-skip").hidden = true;
         document.getElementById("duel-done").hidden = false;
+        if (typeof loadRecommended === "function") loadRecommended();
+        if (typeof loadRadar === "function") loadRadar();
         return;
     }
 
