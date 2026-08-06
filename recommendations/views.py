@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def onboarding_view(request):
+    return render(request, 'recommendations/onboarding.html')
