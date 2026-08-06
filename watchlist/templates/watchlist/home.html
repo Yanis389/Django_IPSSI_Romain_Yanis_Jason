@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil — SérieMatch{% endblock %}
+
+{% block content %}
+<h1>SérieMatch</h1>
+
+{% if user.is_authenticated %}
+<section>
+    <h2>Recommande pour toi</h2>
+    <div id="reco" class="carrousel">
+        <p class="vide">Chargement...</p>
+    </div>
+</section>
+{% else %}
+<p><a href="/duels/">Fais quelques duels</a> pour avoir des recommandations.</p>
+{% endif %}
+
+<section>
+    <h2>Series populaires</h2>
+    <div id="populaires" class="carrousel">
+        <p class="vide">Chargement...</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function afficher(cible, shows, messageVide) {
+    const zone = document.getElementById(cible);
+    if (!shows || shows.length === 0) {
+        zone.innerHTML = '<p class="vide">' + messageVide + '</p>';
+        return;
+    }
+    zone.innerHTML = shows.map(carteSerie).join('');
+}
+
+fetch('/api/shows/search/')
+    .then(r => r.json())
+    .then(data => afficher('populaires', data.results, 'Aucune serie en base.'))
+    .catch(() => afficher('populaires', [], 'Erreur de chargement.'));
+
+{% if user.is_authenticated %}
+fetch('/api/recommendations/')
+    .then(r => r.ok ? r.json() : [])
+    .then(data => afficher('reco', data.results || data, 'Fais des duels pour avoir des recommandations.'))
+    .catch(() => afficher('reco', [], 'Recommandations indisponibles.'));
+{% endif %}
+</script>
+{% endblock %}

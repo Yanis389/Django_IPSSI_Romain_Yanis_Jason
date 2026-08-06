@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SérieMatch{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'watchlist/css/watchlist.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -13,8 +14,14 @@
         <a href="/" class="navbar-brand">SérieMatch</a>
         <div class="navbar-links">
             <a href="/">Accueil</a>
-            <a href="/recherche/">Recherche</a>
-            <a href="/watchlists/">Mes listes</a>
+            <a href="/shows/search/">Recherche</a>
+            <a href="/duels/">Duels</a>
+            {% if user.is_authenticated %}
+                <a href="/watchlists/">Mes listes</a>
+                <a href="#" id="nav-logout">Deconnexion ({{ user.username }})</a>
+            {% else %}
+                <a href="/connexion/">Connexion</a>
+            {% endif %}
         </div>
     </nav>
 
@@ -22,6 +29,7 @@
         {% block content %}{% endblock %}
     </main>
 
+    <script src="{% static 'watchlist/js/app.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
