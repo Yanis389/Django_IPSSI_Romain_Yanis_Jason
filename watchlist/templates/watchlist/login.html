@@ -1,49 +1,94 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Connexion — SérieMatch{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/watchlist.css' %}">
+{% endblock %}
+
 {% block content %}
-<h1>Connexion</h1>
+<div class="auth-carte">
+    <h1>Connexion</h1>
+    <p class="auth-intro">Connecte-toi pour créer tes listes et recevoir des recommandations.</p>
 
-<form id="form-auth" class="form-auth">
-    <input type="text" id="username" placeholder="Nom d'utilisateur" required>
-    <input type="password" id="password" placeholder="Mot de passe" required>
-    <div class="form-boutons">
-        <button type="submit">Se connecter</button>
-        <button type="button" id="btn-register">Creer un compte</button>
+    <form id="form-auth" class="form-auth">
+        <div class="champ">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" autocomplete="username" required>
+        </div>
+        <div class="champ">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" autocomplete="current-password" required>
+        </div>
+        <div class="form-boutons">
+            <button type="submit">Se connecter</button>
+            <button type="button" id="btn-register" class="btn-fantome">Créer un compte</button>
+        </div>
+    </form>
+
+    <p id="message" class="message"></p>
+    <p class="auth-aide">Pas encore de compte ? Choisis un identifiant et un mot de passe, puis clique sur « Créer un compte ».</p>
+</div>
+
+<div class="modale" id="modale-succes" hidden role="dialog" aria-modal="true" aria-labelledby="modale-titre">
+    <div class="modale-boite">
+        <div class="modale-icone" aria-hidden="true">✓</div>
+        <h2 id="modale-titre">Compte créé</h2>
+        <p>Bienvenue <strong id="modale-nom"></strong> ! On va te poser quelques duels pour cerner tes goûts.</p>
+        <button type="button" id="modale-ok">Commencer les duels</button>
     </div>
-</form>
-
-<p id="message" class="message"></p>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 const message = document.getElementById('message');
+const modale = document.getElementById('modale-succes');
+const boutonOk = document.getElementById('modale-ok');
 
-function envoyer(url) {
-    const data = {
+function envoyer(url, apresSucces) {
+    message.className = 'message';
+    message.textContent = '';
+    apiPost(url, {
         username: document.getElementById('username').value,
         password: document.getElementById('password').value,
-    };
-    apiPost(url, data)
+    })
         .then(r => r.json().then(body => ({ok: r.ok, body})))
         .then(({ok, body}) => {
             if (ok) {
-                window.location.href = '/';
+                apresSucces(body);
             } else {
                 message.textContent = body.error || 'Erreur';
             }
+        })
+        .catch(() => {
+            message.textContent = 'Erreur réseau, réessaie.';
         });
 }
 
 document.getElementById('form-auth').addEventListener('submit', (e) => {
     e.preventDefault();
-    envoyer('/api/auth/login/');
+    envoyer('/api/auth/login/', () => {
+        window.location.href = '/';
+    });
 });
 
 document.getElementById('btn-register').addEventListener('click', () => {
-    envoyer('/api/auth/register/');
+    envoyer('/api/auth/register/', (body) => {
+        document.getElementById('modale-nom').textContent = body.username;
+        modale.hidden = false;
+        boutonOk.focus();
+    });
+});
+
+// Valider la modale envoie sur les duels : un profil vide ne sert a rien
+boutonOk.addEventListener('click', () => {
+    window.location.href = '/duels/';
+});
+
+modale.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') boutonOk.click();
 });
 </script>
 {% endblock %}

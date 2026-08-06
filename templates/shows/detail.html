@@ -1,83 +1,116 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails de la Série - SerieMatch</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-dark bg-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="/shows/search/">🎬 SerieMatch</a>
-        </div>
-    </nav>
+{% extends "base.html" %}
+{% load static %}
 
-    <div class="container" id="show-details">
-        <p class="text-center text-muted">Chargement de la série...</p>
-    </div>
+{% block title %}Fiche série — SérieMatch{% endblock %}
 
-    <script>
-        // Django passe l'ID de la série dans le template via la vue views.py   
-        const showId = parseInt("{{ show_id }}", 10);
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/shows.css' %}">
+{% endblock %}
 
-        const fetchShowDetail = async () => {
-            const response = await fetch(`/api/shows/${showId}/`);
-            const show = await response.json();
-            const container = document.getElementById('show-details');
-            
-            const poster = show.poster_url ? show.poster_url : 'https://via.placeholder.com/500x750?text=Pas+d+image';
-            
-            // Générer le HTML pour les recommandations (similar_shows)
-            let recommendationsHtml = '';
-            if (show.similar_shows && show.similar_shows.length > 0) {
-                recommendationsHtml = '<h4 class="mt-5 mb-3">Séries similaires (Recommandation TF-IDF)</h4><div class="row">';
-                show.similar_shows.forEach(sim => {
-                    const simPoster = sim.poster_url ? sim.poster_url : 'https://via.placeholder.com/500x750?text=Image';
-                    recommendationsHtml += `
-                        <div class="col-md-2 col-4 mb-3">
-                            <a href="/shows/${sim.id}/" class="text-decoration-none">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <img src="${simPoster}" class="card-img-top rounded" alt="${sim.title}">
-                                    <div class="card-body p-2 text-center">
-                                        <p class="card-text small text-dark fw-bold mb-0" style="font-size:0.8rem;">${sim.title}</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    `;
-                });
-                recommendationsHtml += '</div>';
-            }
+{% block content %}
+<a class="retour" href="/shows/search/">&larr; Retour à la recherche</a>
 
-            // Générer l'affichage principal
-            container.innerHTML = `
-                <a href="/shows/search/" class="btn btn-sm btn-outline-secondary mb-3">&larr; Retour à la recherche</a>
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <img src="${poster}" class="img-fluid rounded-start w-100" alt="${show.title}">
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h2 class="card-title">${show.title} <span class="text-muted fs-4">(${show.first_air_date ? show.first_air_date.substring(0,4) : 'N/A'})</span></h2>
-                                <p class="mb-2">
-                                    <span class="badge bg-primary">⭐ ${show.vote_average.toFixed(1)}/10</span>
-                                    <span class="badge bg-secondary">${show.number_of_seasons} Saison(s)</span>
-                                    <span class="badge bg-info text-dark">${show.status}</span>
-                                </p>
-                                <p class="text-muted small"><strong>Genres :</strong> ${show.genres.join(', ')}</p>
-                                <h5 class="mt-4">Synopsis</h5>
-                                <p class="card-text">${show.synopsis || "Aucun synopsis disponible pour cette série."}</p>
-                            </div>
-                        </div>
-                    </div>
+<div id="show-details">
+    <p class="vide">Chargement de la série…</p>
+</div>
+
+<section class="similaires" id="similaires" hidden>
+    <h2>Séries similaires <span class="vide">— calculées par TF-IDF</span></h2>
+    <div class="carrousel" id="similaires-liste"></div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Django passe l'ID de la serie dans le template via la vue
+const showId = parseInt("{{ show_id }}", 10);
+
+const conteneur = document.getElementById('show-details');
+
+function afficherFiche(show) {
+    const note = show.vote_average ? show.vote_average.toFixed(1) : '—';
+    const annee = show.first_air_date ? show.first_air_date.substring(0, 4) : 'N/A';
+    const affiche = show.poster_url
+        ? `<img class="fiche-affiche" src="${show.poster_url}" alt="${show.title}">`
+        : '<div class="poster-vide" style="width:100%;height:420px;">Pas d\'affiche</div>';
+
+    conteneur.innerHTML = `
+        <article class="fiche">
+            <div>${affiche}</div>
+            <div>
+                <h1>${show.title} <span class="annee">(${annee})</span></h1>
+                <div class="badges">
+                    <span class="badge badge-note">★ ${note} / 10</span>
+                    ${show.number_of_seasons ? `<span class="badge">${show.number_of_seasons} saison(s)</span>` : ''}
+                    ${show.status ? `<span class="badge">${show.status}</span>` : ''}
                 </div>
-                ${recommendationsHtml}
-            `;
-        };
+                <p class="fiche-genres"><strong>Genres :</strong> ${show.genres.join(', ') || '—'}</p>
+                <h2>Synopsis</h2>
+                <p class="fiche-synopsis">${show.synopsis || "Aucun synopsis disponible pour cette série."}</p>
+                <div class="zone-watchlist" id="zone-watchlist"></div>
+            </div>
+        </article>
+    `;
+}
 
-        fetchShowDetail();
-    </script>
-</body>
-</html>
+function afficherSimilaires(shows) {
+    if (!shows || shows.length === 0) return;
+    document.getElementById('similaires-liste').innerHTML = shows.map(carteSerie).join('');
+    document.getElementById('similaires').hidden = false;
+}
+
+// Bloc « ajouter a une liste » : depend des watchlists de l'utilisateur connecte
+async function afficherWatchlist() {
+    const zone = document.getElementById('zone-watchlist');
+    if (!zone) return;
+
+    const reponse = await fetch('/api/watchlists/');
+    if (!reponse.ok) {
+        zone.innerHTML = '<a class="btn btn-fantome" href="/connexion/">Connecte-toi pour ajouter à une liste</a>';
+        return;
+    }
+
+    const listes = await reponse.json();
+    if (listes.length === 0) {
+        zone.innerHTML = '<a class="btn btn-fantome" href="/watchlists/">Crée d\'abord une liste</a>';
+        return;
+    }
+
+    zone.innerHTML = `
+        <div class="ajout-liste">
+            <select id="choix-liste" aria-label="Choisir une liste">
+                ${listes.map(l => `<option value="${l.id}">${l.name}</option>`).join('')}
+            </select>
+            <button type="button" id="btn-ajouter">Ajouter</button>
+        </div>
+        <p id="retour-watchlist" class="message"></p>
+    `;
+
+    document.getElementById('btn-ajouter').addEventListener('click', () => {
+        const listeId = document.getElementById('choix-liste').value;
+        const retour = document.getElementById('retour-watchlist');
+        apiPost(`/api/watchlists/${listeId}/entries/`, {show_id: showId})
+            .then(r => r.json().then(body => ({ok: r.ok, body})))
+            .then(({ok, body}) => {
+                retour.className = ok ? 'message ok' : 'message';
+                retour.textContent = ok ? 'Ajoutée à la liste.' : (body.error || 'Erreur');
+            })
+            .catch(() => {
+                retour.className = 'message';
+                retour.textContent = 'Erreur réseau.';
+            });
+    });
+}
+
+fetch(`/api/shows/${showId}/`)
+    .then(r => r.json())
+    .then(show => {
+        afficherFiche(show);
+        afficherSimilaires(show.similar_shows);
+        return afficherWatchlist();
+    })
+    .catch(() => {
+        conteneur.innerHTML = '<p class="message">Impossible de charger cette série.</p>';
+    });
+</script>
+{% endblock %}

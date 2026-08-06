@@ -1,42 +1,210 @@
+/* ==========================================================================
+   base.css — socle commun a toutes les pages
+   Variables, reset, navbar, conteneur, boutons, formulaires, cartes serie.
+   ========================================================================== */
+
+:root {
+    --fond: #12121a;
+    --surface: #1a1a26;
+    --surface-haut: #21212f;
+    --bordure: #2a2a3a;
+    --texte: #f0f0f5;
+    --texte-doux: #b0b0c0;
+    --accent: #6c5ce7;
+    --accent-clair: #7d6ef0;
+    --danger: #e05a5a;
+    --succes: #4ade80;
+    --rayon: 8px;
+    --rayon-lg: 12px;
+}
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family: system-ui, -apple-system, sans-serif;
-    background: #12121a;
-    color: #f0f0f5;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--fond);
+    color: var(--texte);
+    line-height: 1.5;
 }
+
+a {
+    color: var(--accent-clair);
+}
+
+h1 {
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+}
+
+h1, h2, h3 {
+    line-height: 1.2;
+}
+
+/* ---------- navbar ---------- */
 
 .navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem 2rem;
-    background: #1a1a26;
-    border-bottom: 1px solid #2a2a3a;
+    background: var(--surface);
+    border-bottom: 1px solid var(--bordure);
 }
 
 .navbar-brand {
     font-weight: 700;
     font-size: 1.25rem;
-    color: #f0f0f5;
+    color: var(--texte);
     text-decoration: none;
 }
 
 .navbar-links a {
-    color: #b0b0c0;
+    color: var(--texte-doux);
     text-decoration: none;
     margin-left: 1.5rem;
 }
 
 .navbar-links a:hover {
-    color: #f0f0f5;
+    color: var(--texte);
 }
+
+/* ---------- conteneur ---------- */
 
 .container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 2rem 1rem;
+}
+
+.container-large {
+    max-width: 1200px;
+}
+
+/* ---------- boutons ---------- */
+
+button,
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--rayon);
+    background: var(--accent);
+    color: var(--texte);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: inherit;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.15s ease;
+}
+
+button:hover,
+.btn:hover {
+    background: var(--accent-clair);
+}
+
+button:focus-visible,
+.btn:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent-clair);
+    outline-offset: 2px;
+}
+
+.btn-fantome {
+    background: transparent;
+    border: 1px solid var(--bordure);
+    color: var(--texte-doux);
+}
+
+.btn-fantome:hover {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--texte);
+}
+
+/* ---------- formulaires ---------- */
+
+input,
+select {
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon);
+    background: var(--surface);
+    color: var(--texte);
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+input::placeholder {
+    color: #6a6a80;
+}
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--texte-doux);
+    margin-bottom: 0.35rem;
+}
+
+/* ---------- cartes serie (accueil, listes, similaires) ---------- */
+
+.carrousel {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+}
+
+.carte {
+    flex: 0 0 140px;
+    color: var(--texte);
+    text-decoration: none;
+}
+
+.carte img,
+.poster-vide {
+    width: 140px;
+    height: 210px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: var(--surface);
+    display: block;
+}
+
+.poster-vide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--texte-doux);
+    text-align: center;
+}
+
+.carte-titre {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.carte-note {
+    font-size: 0.8rem;
+    color: var(--texte-doux);
+}
+
+/* ---------- utilitaires ---------- */
+
+.vide {
+    color: var(--texte-doux);
+}
+
+.message {
+    color: var(--danger);
+    min-height: 1.2rem;
+}
+
+.message.ok {
+    color: var(--succes);
 }

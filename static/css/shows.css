@@ -1,0 +1,204 @@
+/* ==========================================================================
+   shows.css — pages Recherche et Fiche serie
+   ========================================================================== */
+
+/* ---------- mise en page recherche ---------- */
+
+.recherche-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.filtres {
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon-lg);
+    padding: 1.25rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.filtres h2 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+}
+
+.filtres form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.filtres input {
+    width: 100%;
+}
+
+.filtres button {
+    margin-top: 0.25rem;
+    padding: 0.6rem 1rem;
+}
+
+/* ---------- grille de resultats ---------- */
+
+.grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.25rem;
+}
+
+.grille-etat {
+    color: var(--texte-doux);
+    grid-column: 1 / -1;
+}
+
+.tuile {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon);
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--texte);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.tuile:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.tuile img,
+.tuile .poster-vide {
+    width: 100%;
+    height: 225px;
+    object-fit: cover;
+    background: var(--surface-haut);
+    border-radius: 0;
+}
+
+.tuile-corps {
+    padding: 0.7rem 0.8rem 0.85rem;
+}
+
+.tuile-titre {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.tuile-meta {
+    margin-top: 0.3rem;
+    font-size: 0.78rem;
+    color: var(--texte-doux);
+}
+
+/* ---------- fiche serie ---------- */
+
+.fiche {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: var(--rayon-lg);
+    padding: 1.5rem;
+}
+
+.fiche-affiche {
+    width: 100%;
+    border-radius: var(--rayon);
+    display: block;
+}
+
+.fiche h1 {
+    margin: 0 0 0.75rem;
+}
+
+.fiche h1 .annee {
+    color: var(--texte-doux);
+    font-weight: 400;
+    font-size: 1.4rem;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    background: var(--surface-haut);
+    border: 1px solid var(--bordure);
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.8rem;
+    color: var(--texte-doux);
+}
+
+.badge-note {
+    border-color: var(--accent);
+    color: var(--accent-clair);
+}
+
+.fiche-genres {
+    color: var(--texte-doux);
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+
+.fiche h2 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+}
+
+.fiche-synopsis {
+    margin: 0 0 1.75rem;
+    color: var(--texte);
+    max-width: 62ch;
+}
+
+/* ---------- bloc ajout a une liste ---------- */
+
+.zone-watchlist {
+    border-top: 1px solid var(--bordure);
+    padding-top: 1.25rem;
+}
+
+.ajout-liste {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 420px;
+}
+
+.ajout-liste select {
+    flex: 1;
+}
+
+/* ---------- similaires ---------- */
+
+.similaires {
+    margin-top: 2.5rem;
+}
+
+.similaires h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.retour {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 800px) {
+    .recherche-layout,
+    .fiche {
+        grid-template-columns: 1fr;
+    }
+    .filtres { position: static; }
+}

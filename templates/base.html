@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SérieMatch{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'watchlist/css/watchlist.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -25,7 +24,7 @@
         </div>
     </nav>
 
-    <main class="container">
+    <main class="container {% block container_class %}{% endblock %}">
         {% block content %}{% endblock %}
     </main>
 

@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Mes listes — SérieMatch{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/watchlist.css' %}">
+{% endblock %}
 
 {% block content %}
 <h1>Mes listes</h1>

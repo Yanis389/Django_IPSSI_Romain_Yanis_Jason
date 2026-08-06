@@ -1,97 +1,93 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recherche de Séries - SerieMatch</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <nav class="navbar navbar-dark bg-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="/shows/search/">🎬 SerieMatch</a>
-        </div>
-    </nav>
+{% extends "base.html" %}
+{% load static %}
 
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar : Filtres -->
-            <div class="col-md-3 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Filtres</h5>
-                        <form id="search-form">
-                            <div class="mb-2">
-                                <label class="form-label">Genre</label>
-                                <input type="text" name="genre" class="form-control" placeholder="Ex: Drame, Comédie...">
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Année</label>
-                                <input type="text" name="year" class="form-control" placeholder="Ex: 2020 ou 2010s">
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Note Minimum</label>
-                                <input type="number" step="0.1" name="min_rating" class="form-control" placeholder="Ex: 8.0">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 mt-3">Rechercher</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+{% block title %}Recherche — SérieMatch{% endblock %}
 
-            <!-- Résultats de recherche -->
-            <div class="col-md-9">
-                <div class="row" id="results">
-                    <p class="text-center text-muted">Chargement des séries...</p>
-                </div>
+{% block container_class %}container-large{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/shows.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Recherche</h1>
+
+<div class="recherche-layout">
+    <aside class="filtres">
+        <h2>Filtres</h2>
+        <form id="search-form">
+            <div class="champ">
+                <label for="f-genre">Genre</label>
+                <input type="text" id="f-genre" name="genre" placeholder="Drame, Comédie…">
             </div>
-        </div>
+            <div class="champ">
+                <label for="f-year">Année</label>
+                <input type="text" id="f-year" name="year" placeholder="2020 ou 2010s">
+            </div>
+            <div class="champ">
+                <label for="f-rating">Note minimum</label>
+                <input type="number" step="0.1" id="f-rating" name="min_rating" placeholder="8.0">
+            </div>
+            <button type="submit">Rechercher</button>
+        </form>
+    </aside>
+
+    <div class="grille" id="results">
+        <p class="grille-etat">Chargement des séries…</p>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        const fetchShows = async (queryString = '') => {
-            const response = await fetch(`/api/shows/search/${queryString}`);
-            const data = await response.json();
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
+{% block extra_js %}
+<script>
+const zoneResultats = document.getElementById('results');
 
-            if (data.results.length === 0) {
-                resultsDiv.innerHTML = '<p class="text-center">Aucune série trouvée.</p>';
-                return;
-            }
+function etat(message) {
+    zoneResultats.innerHTML = `<p class="grille-etat">${message}</p>`;
+}
 
-            // Générer les cartes pour chaque série
-            data.results.forEach(show => {
-                const poster = show.poster_url ? show.poster_url : 'https://via.placeholder.com/500x750?text=Pas+d+image';
-                const card = `
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100 shadow-sm">
-                            <img src="${poster}" class="card-img-top" alt="${show.title}">
-                            <div class="card-body d-flex flex-column">
-                                <h6 class="card-title">${show.title}</h6>
-                                <p class="card-text text-muted small">⭐ ${show.vote_average.toFixed(1)}/10 | ${show.first_air_date ? show.first_air_date.substring(0,4) : 'N/A'}</p>
-                                <a href="/shows/${show.id}/" class="btn btn-outline-primary mt-auto btn-sm">Voir Détails</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                resultsDiv.innerHTML += card;
-            });
-        };
+function tuile(show) {
+    const note = show.vote_average ? show.vote_average.toFixed(1) : '—';
+    const annee = show.first_air_date ? show.first_air_date.substring(0, 4) : 'N/A';
+    const affiche = show.poster_url
+        ? `<img src="${show.poster_url}" alt="${show.title}">`
+        : '<div class="poster-vide">Pas d\'affiche</div>';
+    return `
+        <a class="tuile" href="/shows/${show.id}/">
+            ${affiche}
+            <div class="tuile-corps">
+                <div class="tuile-titre">${show.title}</div>
+                <div class="tuile-meta">★ ${note} · ${annee}</div>
+            </div>
+        </a>
+    `;
+}
 
-        // Gérer la soumission du formulaire
-        document.getElementById('search-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const params = new URLSearchParams();
-            for (let [key, value] of formData.entries()) {
-                if (value) params.append(key, value);
-            }
-            fetchShows('?' + params.toString());
-        });
+async function chercher(queryString = '') {
+    etat('Chargement des séries…');
+    try {
+        const reponse = await fetch(`/api/shows/search/${queryString}`);
+        const data = await reponse.json();
+        if (!data.results || data.results.length === 0) {
+            etat('Aucune série ne correspond à ces filtres.');
+            return;
+        }
+        zoneResultats.innerHTML = data.results.map(tuile).join('');
+    } catch (e) {
+        etat('Erreur de chargement.');
+    }
+}
 
-        // Charger les séries au lancement
-        fetchShows();
-    </script>
-</body>
-</html>
+document.getElementById('search-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    for (const [cle, valeur] of new FormData(e.target).entries()) {
+        if (valeur) params.append(cle, valeur);
+    }
+    const qs = params.toString();
+    chercher(qs ? '?' + qs : '');
+});
+
+chercher();
+</script>
+{% endblock %}
