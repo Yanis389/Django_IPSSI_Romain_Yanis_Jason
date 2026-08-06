@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from shows.models import Show
 from shows.serializers import ShowListSerializer
 
+from .genre_utils import split_scifi_fantasy
 from .models import DuelChoice, UserProfile
 from .serializers import DuelChoiceInputSerializer
 from .vectorizer import rank_by_similarity, update_profile_vector
@@ -19,7 +20,9 @@ def onboarding_view(request):
 
 
 def genre_overlap(a, b):
-    return len(set(a.get('genres') or []) & set(b.get('genres') or []))
+    genres_a = split_scifi_fantasy(a.get('genres'), a.get('synopsis'))
+    genres_b = split_scifi_fantasy(b.get('genres'), b.get('synopsis'))
+    return len(set(genres_a) & set(genres_b))
 
 
 def pick_diverse_pair(shows, used_pairs, used_show_ids):
@@ -45,7 +48,7 @@ class DuelPairView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        shows = list(Show.objects.values('id', 'genres'))
+        shows = list(Show.objects.values('id', 'genres', 'synopsis'))
         if len(shows) < 2:
             return Response(
                 {'detail': "Pas assez de series en base."},
