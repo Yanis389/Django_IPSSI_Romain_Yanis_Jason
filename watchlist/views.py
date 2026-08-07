@@ -6,7 +6,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from recommendations.models import UserProfile
 from shows.models import Show
 
 from .models import Watchlist, WatchlistEntry
@@ -56,12 +55,6 @@ def login_view(request):
 
 @api_view(['POST'])
 def logout_view(request):
-    if request.user.is_authenticated:
-        Watchlist.objects.filter(user=request.user).delete()
-        UserProfile.objects.filter(user=request.user).update(
-            taste_vector=[],
-            onboarding_completed=False,
-        )
     logout(request)
     return Response({'detail': 'deconnecte'})
 

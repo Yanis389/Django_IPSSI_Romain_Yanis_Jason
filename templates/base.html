@@ -14,8 +14,8 @@
         <div class="navbar-links">
             <a href="/accueil/">Accueil</a>
             <a href="/shows/search/">Recherche</a>
-            <a href="/duels/">Duels</a>
             {% if user.is_authenticated %}
+                <a href="/duels/">Duels</a>
                 <a href="/watchlists/">Mes listes</a>
                 <a href="#" id="nav-logout">Deconnexion ({{ user.username }})</a>
             {% else %}
